@@ -9,6 +9,8 @@ function cn(...inputs) {
   return twMerge(clsx(inputs));
 }
 
+const CHECKOUT_LINK = "https://pay.kirvano.com/095efb02-4216-44ce-8e9e-89bbbdfb41ec";
+
 // --- NOVOS EFEITOS VISUAIS MÁGICOS ---
 
 // Efeito 1: Brasas Roxas/Rosas subindo lentamente
@@ -106,24 +108,32 @@ const MagicBadge = ({ text, icon: Icon }) => (
   </div>
 );
 
-const AnimatedButton = ({ children, primary = false, className, onClick, fullWidth = false }) => (
-  <motion.button
-    whileHover={{ scale: 1.03 }}
-    whileTap={{ scale: 0.97 }}
-    onClick={onClick}
-    className={cn(
-      "relative overflow-hidden group flex items-center justify-center gap-2 px-8 py-4 rounded-xl font-bold transition-all duration-500",
-      fullWidth ? "w-full" : "w-auto",
-      primary 
-        ? "bg-gradient-to-r from-brand-pink via-brand-purple to-brand-pink bg-[length:200%_auto] animate-shine text-white shadow-[0_0_30px_rgba(236,72,153,0.5)] border border-white/20 hover:shadow-[0_0_50px_rgba(236,72,153,0.8)]" 
-        : "bg-white/5 backdrop-blur-md border border-white/10 text-white hover:bg-white/10 hover:border-brand-pink/30 hover:shadow-[0_0_20px_rgba(124,58,237,0.3)]",
-      className
-    )}
-  >
-    {primary && <div className="absolute inset-0 bg-white/30 blur-xl opacity-0 group-hover:opacity-50 transition-opacity duration-500" />}
-    <span className="relative z-10 flex items-center gap-2 text-shadow">{children}</span>
-  </motion.button>
-);
+const AnimatedButton = ({ children, primary = false, className, onClick, fullWidth = false, href }) => {
+  // Se tiver 'href', usamos motion.a, senão usamos motion.button
+  const Component = href ? motion.a : motion.button;
+  
+  return (
+    <Component
+      href={href}
+      target={href ? "_blank" : undefined}
+      rel={href ? "noopener noreferrer" : undefined}
+      whileHover={{ scale: 1.03 }}
+      whileTap={{ scale: 0.97 }}
+      onClick={onClick}
+      className={cn(
+        "relative overflow-hidden group flex items-center justify-center gap-2 px-8 py-4 rounded-xl font-bold transition-all duration-500 cursor-pointer",
+        fullWidth ? "w-full" : "w-auto",
+        primary 
+          ? "bg-gradient-to-r from-brand-pink via-brand-purple to-brand-pink bg-[length:200%_auto] animate-shine text-white shadow-[0_0_30px_rgba(236,72,153,0.5)] border border-white/20 hover:shadow-[0_0_50px_rgba(236,72,153,0.8)]" 
+          : "bg-white/5 backdrop-blur-md border border-white/10 text-white hover:bg-white/10 hover:border-brand-pink/30 hover:shadow-[0_0_20px_rgba(124,58,237,0.3)]",
+        className
+      )}
+    >
+      {primary && <div className="absolute inset-0 bg-white/30 blur-xl opacity-0 group-hover:opacity-50 transition-opacity duration-500" />}
+      <span className="relative z-10 flex items-center gap-2 text-shadow">{children}</span>
+    </Component>
+  );
+};
 
 const FadeIn = ({ children, delay = 0, className }) => {
   const ref = useRef(null);
@@ -271,16 +281,21 @@ const Hero = ({ onAuth }) => (
         </div>
         
         <div className="flex flex-col gap-1 mb-5">
-          <span className="text-gray-400 text-sm line-through">De R$ 97,00</span>
+          <span className="text-gray-400 text-sm line-through">De R$ 42,00</span>
           <div className="flex items-center justify-center gap-2">
-            <span className="text-4xl font-bold text-white drop-shadow-[0_0_10px_rgba(255,255,255,0.3)]">R$ 37,99</span>
+            <span className="text-4xl font-bold text-white drop-shadow-[0_0_10px_rgba(255,255,255,0.3)]">R$ 17,50</span>
             <span className="bg-brand-pink/20 border border-brand-pink/30 text-brand-pink text-xs font-bold px-2 py-0.5 rounded animate-pulse">HOJE</span>
           </div>
         </div>
 
-        <AnimatedButton primary fullWidth onClick={() => onAuth('signup')} className="shadow-[0_0_30px_rgba(236,72,153,0.4)] py-4 text-lg">
-          Quero Alinhar Minha Energia <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform"/>
-        </AnimatedButton>
+       <AnimatedButton 
+  primary 
+  fullWidth 
+  href={CHECKOUT_LINK} // <--- AQUI A MUDANÇA
+  className="shadow-[0_0_30px_rgba(236,72,153,0.4)] py-4 text-lg"
+>
+  Quero Alinhar Minha Energia <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform"/>
+</AnimatedButton>
         
         <p className="flex items-center justify-center gap-1.5 text-[11px] text-gray-400 mt-3">
           <ShieldCheck size={12} className="text-brand-pink"/> Acesso Imediato e Garantido
@@ -296,7 +311,7 @@ const Benefits = () => {
     { icon: Radio, title: "Raio-X Vibracional", desc: "Identifique sua frequência exata e o que ela está atraindo." },
     { icon: Heart, title: "Ímã de Relacionamentos", desc: "Sintonize a vibração que atrai pessoas de alto valor." },
     { icon: Zap, title: "Quebra de Bloqueios", desc: "Destrua as crenças ocultas que repelem a abundância." },
-    { icon: Sparkles, title: "Reprogramação Quântica", desc: "Técnicas para mudar seu estado vibracional em segundos." },
+    { icon: Sparkles, title: "Reprogramação Quântica", desc: "Técnicas para mudar seu estado vibracional em segundos e adquirir suas manifestações." },
   ];
 
   return (
@@ -348,9 +363,9 @@ const Testimonials = () => (
       </FadeIn>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
          {[
-           { name: "Mariana S.", text: "Eu atraía sempre o mesmo padrão. O diagnóstico foi um tapa na cara necessário. Em 3 semanas tudo mudou." },
-           { name: "Carlos E.", text: "Achava que era papo furado, mas a precisão sobre meus bloqueios financeiros foi assustadora. É como se lessem minha mente." },
-           { name: "Fernanda L.", text: "A sensação de paz depois de entender minha própria energia não tem preço. Parei de forçar e comecei a fluir." }
+           { name: "Mariana Carvalho", text: "Eu tentei por muito tempo e não conseguia atrair oq eu queria. Mas essa função de achar um perfil me ajudou muito a ter uma direção. Em 2 semanas consegui minha primeira manifestação!" },
+           { name: "Carlos Henrique", text: "Vou ser sincero pessoal, achei que era papo furado, mas a precisão sobre minhas dificuldades foi insana, como se me conhecessem. E também as dicas que vem com cada perfil, muito bom pra quem tá estagnado e não sabe oq fazer." },
+           { name: "Antônio992.", text: "A sensação de paz depois de entender minha própria energia não tem preço. Parei de forçar e comecei a fluir." }
          ].map((t, i) => (
            <FadeIn key={i} delay={i * 0.2}>
              <motion.div whileHover={{ y: -5 }} className="bg-gradient-to-br from-brand-deepPurple/80 to-brand-dark border border-brand-purple/20 p-8 rounded-3xl text-left relative group hover:border-brand-pink/30 transition-colors hover:shadow-[0_0_25px_rgba(124,58,237,0.2)]">
@@ -397,9 +412,9 @@ const PricingFooter = ({ onAuth }) => (
          </p>
 
          <div className="mb-8 relative z-10 inline-block">
-             <span className="text-gray-500 text-lg line-through block mb-1">R$ 97,00</span>
+             <span className="text-gray-500 text-lg line-through block mb-1">R$ 42,00</span>
              <div className="text-6xl font-bold text-white tracking-tight drop-shadow-[0_0_15px_rgba(236,72,153,0.5)]">
-                R$ 37<span className="text-3xl text-gray-300">,99</span>
+                R$17<span className="text-3xl text-gray-300">,50</span>
             </div>
              <div className="bg-brand-pink/20 text-brand-pink text-xs font-bold uppercase tracking-widest px-3 py-1 rounded-full inline-block mt-2 border border-brand-pink/30 animate-pulse">Acesso Vitalício</div>
          </div>
@@ -409,8 +424,8 @@ const PricingFooter = ({ onAuth }) => (
                 "Diagnóstico Vibracional Completo", 
                 "Mapa de Bloqueios Ocultos", 
                 "Guia de Reprogramação Imediata", 
-                "Bônus 1: Ritual de Atração Matinal",
-                "Bônus 2: Áudio Binaural de Limpeza"
+                "Bônus Incluídos: Áudios Vibracionais, Meditações guiadas para diferentes objetivos, Assistente de Afirmações, Assistente IA",
+            
             ].map((feat, i) => (
               <li key={i} className="flex items-start gap-3 text-gray-200 text-sm md:text-base">
                 <div className="mt-1 bg-brand-pink/20 p-1 rounded-full">
