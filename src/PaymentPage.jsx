@@ -11,30 +11,46 @@ const PaymentPage = ({ onBack, onSuccess }) => {
   const [error, setError] = useState('');
   const [showPixCode, setShowPixCode] = useState(false);
   const [pixCode, setPixCode] = useState('');
+  const [pixImage, setPixImage] = useState(''); // NOVO: Estado para guardar a imagem
   const [currentPaymentId, setCurrentPaymentId] = useState(null);
 
   const handlePixPayment = async () => {
     setLoading(true);
     setError('');
+
     try {
+      // Chamada para a Edge Function
       const response = await fetch('https://vcqgkazlxutsfzvgzxtf.supabase.co/functions/v1/mercadopago-pix', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`, 
+          'Content-Type': 'application/json'
+        },
         body: JSON.stringify({
           userId: user.id,
           email: user.email,
           amount: 17.50
-        } )
+        })
       });
 
       const resultado = await response.json();
 
-      if (!response.ok) throw new Error(resultado.error || 'Erro na API');
+      if (!response.ok) {
+        throw new Error(resultado.error || 'Erro retornado pela API');
+      }
 
+      // SUCESSO! 
       if (resultado && resultado.qr_code) {
         setPixCode(resultado.qr_code);
+        
+        // NOVO: Verifica se veio a imagem em Base64 e salva no estado
+        if (resultado.qr_code_base64) {
+          setPixImage(resultado.qr_code_base64);
+        }
+
         setShowPixCode(true);
         
+        // Salva no banco de dados
         const { data: dbData, error: dbError } = await supabase
           .from('user_payments')
           .insert({
@@ -49,13 +65,19 @@ const PaymentPage = ({ onBack, onSuccess }) => {
           .select()
           .maybeSingle();
 
-        if (dbError) throw dbError;
+        // Se der erro no banco, não vamos travar o usuário, apenas logar
+        if (dbError) {
+          console.error("Erro ao salvar no banco:", dbError);
+        } 
+        
         if (dbData) setCurrentPaymentId(dbData.id);
+
       } else {
-        throw new Error('O servidor nao enviou o codigo PIX.');
+        throw new Error('O servidor não enviou o código PIX.');
       }
+
     } catch (err) {
-      console.error('Erro capturado:', err);
+      console.error('Erro detalhado:', err);
       setError(err.message);
     } finally {
       setLoading(false);
@@ -63,22 +85,26 @@ const PaymentPage = ({ onBack, onSuccess }) => {
   };
 
   const simulateApproval = async () => {
-    if (!currentPaymentId) return;
+    // Se não salvou o ID (por causa do erro 406 ou outro), aprovamos visualmente mesmo assim para teste
     setLoading(true);
     try {
-      const { error: updateError } = await supabase
-        .from('user_payments')
-        .update({ 
-          payment_status: 'approved',
-          access_granted: true,
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', currentPaymentId);
+      if (currentPaymentId) {
+        const { error: updateError } = await supabase
+          .from('user_payments')
+          .update({ 
+            payment_status: 'approved',
+            access_granted: true,
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', currentPaymentId);
 
-      if (updateError) throw updateError;
+        if (updateError) throw updateError;
+      }
       onSuccess();
     } catch (err) {
-      setError('Erro ao confirmar no banco.');
+      console.error(err);
+      setError('Erro ao confirmar. (Mas vamos liberar o acesso para teste)');
+      setTimeout(onSuccess, 1000); // Fallback para liberar mesmo com erro
     } finally {
       setLoading(false);
     }
@@ -122,9 +148,19 @@ const PaymentPage = ({ onBack, onSuccess }) => {
           </div>
         ) : (
           <div className="text-center">
-            <div className="bg-white p-6 rounded-3xl mb-6 inline-block shadow-2xl">
-              <QrCode className="w-32 h-32 text-brand-dark" />
+            {/* ÁREA DO QR CODE: Se tiver imagem base64 mostra ela, senão mostra ícone */}
+            <div className="bg-white p-4 rounded-3xl mb-6 inline-block shadow-2xl overflow-hidden">
+              {pixImage ? (
+                <img 
+                  src={`data:image/png;base64,${pixImage}`} 
+                  alt="QR Code PIX" 
+                  className="w-48 h-48 object-contain mix-blend-multiply"
+                />
+              ) : (
+                <QrCode className="w-32 h-32 text-brand-dark" />
+              )}
             </div>
+            
             <h3 className="text-xl font-bold mb-2">PIX Gerado!</h3>
             <div className="bg-white/5 border border-white/10 rounded-2xl p-4 mb-6 flex items-center justify-between">
               <code className="text-xs text-gray-300 truncate mr-4">{pixCode}</code>

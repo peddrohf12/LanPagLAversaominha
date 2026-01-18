@@ -90,7 +90,9 @@ export const AuthProvider = ({ children }) => {
         .from('user_payments')
         .select('payment_status, access_granted')
         .eq('user_id', user.id)
-        .single()
+        .order('created_at', { ascending: false }) // Ordena pelo mais recente
+        .limit(1) // Pega só um
+        .maybeSingle() // Usa maybeSingle em vez de single para não dar erro se vier vazio
       
       if (error) {
         // Se não encontrar registro, usuário não pagou
