@@ -1,28 +1,17 @@
 import React, { useRef, useState, useMemo } from 'react';
 import { motion, useInView, AnimatePresence } from 'framer-motion';
-<<<<<<< HEAD
-import { Sparkles, ArrowRight, CheckCircle, ShieldCheck, Star, Zap, User, Mail, Lock, Heart, Radio, X } from 'lucide-react';
-import clsx from 'clsx';
-import { twMerge } from 'tailwind-merge';
-=======
 import { Sparkles, ArrowRight, CheckCircle, ShieldCheck, Star, Zap, User, Mail, Lock, Heart, Radio, X, AlertCircle } from 'lucide-react';
 import clsx from 'clsx';
 import { twMerge } from 'tailwind-merge';
 import { useAuth } from './AuthContext';
 import MembersArea from './MembersArea';
 import PaymentPage from './PaymentPage';
->>>>>>> master
 
 // --- Utilitários ---
 function cn(...inputs) {
   return twMerge(clsx(inputs));
 }
 
-<<<<<<< HEAD
-const CHECKOUT_LINK = "https://pay.kirvano.com/095efb02-4216-44ce-8e9e-89bbbdfb41ec";
-
-=======
->>>>>>> master
 // --- NOVOS EFEITOS VISUAIS MÁGICOS ---
 
 // Efeito 1: Brasas Roxas/Rosas subindo lentamente
@@ -120,34 +109,6 @@ const MagicBadge = ({ text, icon: Icon }) => (
   </div>
 );
 
-<<<<<<< HEAD
-const AnimatedButton = ({ children, primary = false, className, onClick, fullWidth = false, href }) => {
-  // Se tiver 'href', usamos motion.a, senão usamos motion.button
-  const Component = href ? motion.a : motion.button;
-  
-  return (
-    <Component
-      href={href}
-      target={href ? "_blank" : undefined}
-      rel={href ? "noopener noreferrer" : undefined}
-      whileHover={{ scale: 1.03 }}
-      whileTap={{ scale: 0.97 }}
-      onClick={onClick}
-      className={cn(
-        "relative overflow-hidden group flex items-center justify-center gap-2 px-8 py-4 rounded-xl font-bold transition-all duration-500 cursor-pointer",
-        fullWidth ? "w-full" : "w-auto",
-        primary 
-          ? "bg-gradient-to-r from-brand-pink via-brand-purple to-brand-pink bg-[length:200%_auto] animate-shine text-white shadow-[0_0_30px_rgba(236,72,153,0.5)] border border-white/20 hover:shadow-[0_0_50px_rgba(236,72,153,0.8)]" 
-          : "bg-white/5 backdrop-blur-md border border-white/10 text-white hover:bg-white/10 hover:border-brand-pink/30 hover:shadow-[0_0_20px_rgba(124,58,237,0.3)]",
-        className
-      )}
-    >
-      {primary && <div className="absolute inset-0 bg-white/30 blur-xl opacity-0 group-hover:opacity-50 transition-opacity duration-500" />}
-      <span className="relative z-10 flex items-center gap-2 text-shadow">{children}</span>
-    </Component>
-  );
-};
-=======
 const AnimatedButton = ({ children, primary = false, className, onClick, fullWidth = false, disabled = false }) => (
   <motion.button
     whileHover={{ scale: disabled ? 1 : 1.03 }}
@@ -168,7 +129,6 @@ const AnimatedButton = ({ children, primary = false, className, onClick, fullWid
     <span className="relative z-10 flex items-center gap-2 text-shadow">{children}</span>
   </motion.button>
 );
->>>>>>> master
 
 const FadeIn = ({ children, delay = 0, className }) => {
   const ref = useRef(null);
@@ -186,11 +146,6 @@ const FadeIn = ({ children, delay = 0, className }) => {
   );
 };
 
-<<<<<<< HEAD
-// --- Modal de Autenticação (Mantido igual, mas se beneficia do fundo novo) ---
-const AuthModal = ({ isOpen, onClose, initialView }) => {
-  const [view, setView] = useState(initialView || 'login');
-=======
 // --- Modal de Autenticação ATUALIZADO com Supabase ---
 const AuthModal = ({ isOpen, onClose, initialView }) => {
   const [view, setView] = useState(initialView || 'login');
@@ -258,7 +213,6 @@ const AuthModal = ({ isOpen, onClose, initialView }) => {
       setLoading(false);
     }
   };
->>>>>>> master
 
   return (
     <AnimatePresence>
@@ -288,15 +242,11 @@ const AuthModal = ({ isOpen, onClose, initialView }) => {
               {['login', 'signup'].map((tab) => (
                 <button
                   key={tab}
-<<<<<<< HEAD
-                  onClick={() => setView(tab)}
-=======
                   onClick={() => {
                     setView(tab);
                     setError('');
                     setSuccess('');
                   }}
->>>>>>> master
                   className={cn("flex-1 py-2.5 text-sm font-semibold rounded-lg transition-all relative overflow-hidden", view === tab ? "text-white shadow-lg" : "text-gray-400 hover:text-white")}
                 >
                   {view === tab && <motion.div layoutId="tabBg" className="absolute inset-0 bg-gradient-to-r from-brand-purple to-brand-pink -z-10" />}
@@ -305,17 +255,6 @@ const AuthModal = ({ isOpen, onClose, initialView }) => {
               ))}
             </div>
 
-<<<<<<< HEAD
-            <form className="space-y-4 relative z-10" onSubmit={(e) => e.preventDefault()}>
-               {view === 'signup' && (
-                 <InputField icon={User} type="text" placeholder="Seu nome" />
-               )}
-               <InputField icon={Mail} type="email" placeholder="Seu e-mail" />
-               <InputField icon={Lock} type="password" placeholder="Sua senha" />
-               
-               <AnimatedButton primary fullWidth className="py-3 mt-4 shadow-lg">
-                 {view === 'login' ? 'Acessar Agora' : 'Finalizar Cadastro'}
-=======
             {error && (
               <motion.div
                 initial={{ opacity: 0, y: -10 }}
@@ -365,7 +304,6 @@ const AuthModal = ({ isOpen, onClose, initialView }) => {
                
                <AnimatedButton primary fullWidth className="py-3 mt-4 shadow-lg" disabled={loading}>
                  {loading ? 'Processando...' : (view === 'login' ? 'Acessar Agora' : 'Finalizar Cadastro')}
->>>>>>> master
                </AnimatedButton>
             </form>
           </motion.div>
@@ -375,12 +313,6 @@ const AuthModal = ({ isOpen, onClose, initialView }) => {
   );
 }
 
-<<<<<<< HEAD
-const InputField = ({ icon: Icon, ...props }) => (
-    <div className="relative group">
-        <Icon className="absolute left-3 top-3.5 text-gray-500 group-focus-within:text-brand-pink transition-colors" size={18}/>
-        <input {...props} className="w-full bg-white/5 border border-white/10 rounded-xl py-3 pl-10 text-white focus:border-brand-pink/50 focus:bg-white/10 focus:outline-none transition-all duration-300 placeholder:text-gray-500 group-hover:border-white/20" />
-=======
 const InputField = ({ icon: Icon, onChange, value, ...props }) => (
     <div className="relative group">
         <Icon className="absolute left-3 top-3.5 text-gray-500 group-focus-within:text-brand-pink transition-colors" size={18}/>
@@ -390,7 +322,6 @@ const InputField = ({ icon: Icon, onChange, value, ...props }) => (
           onChange={onChange}
           className="w-full bg-white/5 border border-white/10 rounded-xl py-3 pl-10 text-white focus:border-brand-pink/50 focus:bg-white/10 focus:outline-none transition-all duration-300 placeholder:text-gray-500 group-hover:border-white/20" 
         />
->>>>>>> master
         {/* Glow no focus */}
         <div className="absolute inset-0 rounded-xl bg-brand-pink/20 blur-md opacity-0 group-focus-within:opacity-100 transition-opacity pointer-events-none -z-10" />
     </div>
@@ -404,10 +335,6 @@ const Header = ({ onAuth }) => (
     <div className="flex items-center gap-2 font-serif text-xl font-bold text-white tracking-tighter group cursor-pointer">
       <div className="relative bg-gradient-to-br from-brand-pink to-brand-purple p-1.5 rounded-lg shadow-[0_0_15px_rgba(236,72,153,0.5)] group-hover:shadow-[0_0_25px_rgba(236,72,153,0.8)] transition-shadow">
         <Sparkles size={16} className="text-white fill-white/20 group-hover:animate-spin-slow" />
-<<<<<<< HEAD
-        <div className="absolute inset-0 bg-white/30 blur-md opacity-0 group-hover:opacity-100 transition-opacity rounded-lg" />
-=======
->>>>>>> master
       </div>
       Percepção<span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-pink to-brand-purple animate-shine bg-[length:200%_auto]">Social</span>
     </div>
@@ -468,20 +395,9 @@ const Hero = ({ onAuth }) => (
           </div>
         </div>
 
-<<<<<<< HEAD
-       <AnimatedButton 
-  primary 
-  fullWidth 
-  href={CHECKOUT_LINK} // <--- AQUI A MUDANÇA
-  className="shadow-[0_0_30px_rgba(236,72,153,0.4)] py-4 text-lg"
->
-  Quero Alinhar Minha Energia <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform"/>
-</AnimatedButton>
-=======
         <AnimatedButton primary fullWidth onClick={() => onAuth('signup')} className="shadow-[0_0_30px_rgba(236,72,153,0.4)] py-4 text-lg">
           Quero Alinhar Minha Energia <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform"/>
         </AnimatedButton>
->>>>>>> master
         
         <p className="flex items-center justify-center gap-1.5 text-[11px] text-gray-400 mt-3">
           <ShieldCheck size={12} className="text-brand-pink"/> Acesso Imediato e Garantido
@@ -555,11 +471,7 @@ const Testimonials = () => (
          ].map((t, i) => (
            <FadeIn key={i} delay={i * 0.2}>
              <motion.div whileHover={{ y: -5 }} className="bg-gradient-to-br from-brand-deepPurple/80 to-brand-dark border border-brand-purple/20 p-8 rounded-3xl text-left relative group hover:border-brand-pink/30 transition-colors hover:shadow-[0_0_25px_rgba(124,58,237,0.2)]">
-<<<<<<< HEAD
-               <div className="absolute top-4 left-6 text-brand-pink/20 font-serif text-8xl leading-none select-none">“</div>
-=======
                <div className="absolute top-4 left-6 text-brand-pink/20 font-serif text-8xl leading-none select-none">"</div>
->>>>>>> master
                <div className="flex gap-1 mb-4 relative z-10">
                  {[1,2,3,4,5].map(s => <Star key={s} size={14} className="fill-brand-orange text-brand-orange drop-shadow" />)}
                </div>
@@ -621,11 +533,7 @@ const PricingFooter = ({ onAuth }) => (
                 <div className="mt-1 bg-brand-pink/20 p-1 rounded-full">
                     <CheckCircle size={16} className="text-brand-pink flex-shrink-0" /> 
                 </div>
-<<<<<<< HEAD
-                <span className={i > 2 ? "text-white font-semibold" : ""}>{feat}</span>
-=======
                 <span>{feat}</span>
->>>>>>> master
               </li>
             ))}
          </ul>
@@ -644,29 +552,20 @@ const PricingFooter = ({ onAuth }) => (
   </section>
 );
 
-<<<<<<< HEAD
-// --- APP PRINCIPAL ---
-=======
 // --- APP PRINCIPAL ATUALIZADO ---
->>>>>>> master
 
 function App() {
   const [authOpen, setAuthOpen] = useState(false);
   const [authView, setAuthView] = useState('login');
-<<<<<<< HEAD
-=======
   const { user, loading, checkPaidAccess } = useAuth();
   const [showMembersArea, setShowMembersArea] = useState(false);
   const [showPaymentPage, setShowPaymentPage] = useState(false);
->>>>>>> master
 
   const handleOpenAuth = (view) => {
     setAuthView(view);
     setAuthOpen(true);
   };
 
-<<<<<<< HEAD
-=======
   // Se usuário está logado e clicou em "Área de Membros", mostrar área de membros
   React.useEffect(() => {
     if (user && showMembersArea) {
@@ -724,7 +623,6 @@ function App() {
     return <MembersArea onBackToHome={() => setShowMembersArea(false)} />;
   }
 
->>>>>>> master
   return (
     <div className="min-h-screen bg-brand-dark text-white selection:bg-brand-pink/40 selection:text-white font-sans overflow-x-hidden relative">
       <MagicalBackground />
@@ -753,8 +651,4 @@ function App() {
   );
 }
 
-<<<<<<< HEAD
 export default App;
-=======
-export default App;
->>>>>>> master
