@@ -1,5 +1,9 @@
 {
   "dependencies": {
+<<<<<<< HEAD
+=======
+    "@supabase/supabase-js": "^2.90.1",
+>>>>>>> master
     "clsx": "^2.1.1",
     "css": "^3.0.0",
     "framer-motion": "^12.26.2",
