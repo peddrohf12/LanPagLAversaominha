@@ -1,0 +1,10 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Se houver outros estilos globais, coloque abaixo */
+html, body {
+  margin: 0;
+  padding: 0;
+  background-color: #05020a; /* Cor de fallback para o fundo */
+}
