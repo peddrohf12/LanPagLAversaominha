@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { CheckCircle, Copy, QrCode, ArrowLeft, Loader2, AlertCircle, Sparkles } from 'lucide-react';
+import { CheckCircle, Copy, QrCode, ArrowLeft, Loader2, AlertCircle, Sparkles, RefreshCw } from 'lucide-react';
 import { supabase } from './supabaseClient';
 import { useAuth } from './AuthContext';
 
@@ -11,16 +11,19 @@ const PaymentPage = ({ onBack, onSuccess }) => {
   const [error, setError] = useState('');
   const [showPixCode, setShowPixCode] = useState(false);
   const [pixCode, setPixCode] = useState('');
-  const [pixImage, setPixImage] = useState(''); // NOVO: Estado para guardar a imagem
+  const [pixImage, setPixImage] = useState('');
   const [currentPaymentId, setCurrentPaymentId] = useState(null);
 
   const handlePixPayment = async () => {
+    // Log de segurança
+    console.log("Tentando criar pagamento. User ID:", user?.id, "Email:", user?.email);
+    
     setLoading(true);
     setError('');
 
     try {
       // Chamada para a Edge Function
-      const response = await fetch('https://vcqgkazlxutsfzvgzxtf.supabase.co/functions/v1/mercadopago-pix', {
+      const response = await fetch('https://vcqgkazlxutsfzvgzxtf.supabase.co/functions/v1/pix-final', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`, 
@@ -29,28 +32,31 @@ const PaymentPage = ({ onBack, onSuccess }) => {
         body: JSON.stringify({
           userId: user.id,
           email: user.email,
-          amount: 17.50
+          amount: 17.5
         })
       });
 
-      const resultado = await response.json();
+      const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(resultado.error || 'Erro retornado pela API');
+        throw new Error(data.error || 'Erro retornado pela API');
       }
 
-      // SUCESSO! 
-      if (resultado && resultado.qr_code) {
-        setPixCode(resultado.qr_code);
+      // --- AQUI ESTÁ A CORREÇÃO MÁGICA ---
+      // O Mercado Pago retorna o PIX dentro de 'point_of_interaction.transaction_data'
+      const qrCodeString = data.point_of_interaction?.transaction_data?.qr_code;
+      const qrCodeBase64 = data.point_of_interaction?.transaction_data?.qr_code_base64;
+
+      if (qrCodeString) {
+        setPixCode(qrCodeString);
         
-        // NOVO: Verifica se veio a imagem em Base64 e salva no estado
-        if (resultado.qr_code_base64) {
-          setPixImage(resultado.qr_code_base64);
+        if (qrCodeBase64) {
+          setPixImage(qrCodeBase64);
         }
 
         setShowPixCode(true);
         
-        // Salva no banco de dados
+        // Salva no banco de dados como "pending"
         const { data: dbData, error: dbError } = await supabase
           .from('user_payments')
           .insert({
@@ -60,51 +66,49 @@ const PaymentPage = ({ onBack, onSuccess }) => {
             payment_method: 'pix',
             amount: 17.50,
             access_granted: false,
-            payment_id: resultado.id.toString()
+            payment_id: data.id.toString()
           })
           .select()
           .maybeSingle();
 
-        // Se der erro no banco, não vamos travar o usuário, apenas logar
-        if (dbError) {
-          console.error("Erro ao salvar no banco:", dbError);
-        } 
-        
+        if (dbError) console.error("Erro ao salvar no banco:", dbError);
         if (dbData) setCurrentPaymentId(dbData.id);
 
       } else {
-        throw new Error('O servidor não enviou o código PIX.');
+        // Log para ajudar no debug caso falhe
+        console.error("JSON Recebido (Sem QR Code):", data);
+        throw new Error('O servidor respondeu OK, mas o código PIX não foi encontrado.');
       }
 
     } catch (err) {
       console.error('Erro detalhado:', err);
-      setError(err.message);
+      setError(err.message || "Erro desconhecido ao gerar PIX");
     } finally {
       setLoading(false);
     }
   };
 
-  const simulateApproval = async () => {
-    // Se não salvou o ID (por causa do erro 406 ou outro), aprovamos visualmente mesmo assim para teste
+  // Função para verificar se o pagamento foi aprovado
+  const checkPaymentStatus = async () => {
+    if (!currentPaymentId) return;
     setLoading(true);
     try {
-      if (currentPaymentId) {
-        const { error: updateError } = await supabase
-          .from('user_payments')
-          .update({ 
-            payment_status: 'approved',
-            access_granted: true,
-            updated_at: new Date().toISOString()
-          })
-          .eq('id', currentPaymentId);
+      const { data, error } = await supabase
+        .from('user_payments')
+        .select('payment_status, access_granted')
+        .eq('id', currentPaymentId)
+        .maybeSingle();
 
-        if (updateError) throw updateError;
+      if (error) throw error;
+
+      if (data && data.payment_status === 'approved') {
+        onSuccess();
+      } else {
+        alert('O banco ainda não confirmou o pagamento. Aguarde alguns segundos e tente novamente.');
       }
-      onSuccess();
     } catch (err) {
       console.error(err);
-      setError('Erro ao confirmar. (Mas vamos liberar o acesso para teste)');
-      setTimeout(onSuccess, 1000); // Fallback para liberar mesmo com erro
+      setError('Erro ao verificar status.');
     } finally {
       setLoading(false);
     }
@@ -122,12 +126,14 @@ const PaymentPage = ({ onBack, onSuccess }) => {
           </div>
           <h2 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-400">Pagamento Real</h2>
         </div>
+        
         {error && (
           <div className="bg-red-500/10 border border-red-500/20 text-red-400 p-4 rounded-xl mb-6 flex items-start gap-3">
             <AlertCircle className="w-5 h-5 shrink-0 mt-0.5" />
             <p className="text-sm">{error}</p>
           </div>
         )}
+
         {!showPixCode ? (
           <div className="space-y-4">
             <div className="bg-white/5 border border-white/10 rounded-2xl p-4 mb-6">
@@ -148,7 +154,7 @@ const PaymentPage = ({ onBack, onSuccess }) => {
           </div>
         ) : (
           <div className="text-center">
-            {/* ÁREA DO QR CODE: Se tiver imagem base64 mostra ela, senão mostra ícone */}
+            {/* ÁREA DO QR CODE */}
             <div className="bg-white p-4 rounded-3xl mb-6 inline-block shadow-2xl overflow-hidden">
               {pixImage ? (
                 <img 
@@ -162,13 +168,24 @@ const PaymentPage = ({ onBack, onSuccess }) => {
             </div>
             
             <h3 className="text-xl font-bold mb-2">PIX Gerado!</h3>
+            <p className="text-gray-400 mb-6 text-sm">Abra o app do seu banco e pague via PIX.</p>
+
             <div className="bg-white/5 border border-white/10 rounded-2xl p-4 mb-6 flex items-center justify-between">
               <code className="text-xs text-gray-300 truncate mr-4">{pixCode}</code>
               <button onClick={() => { navigator.clipboard.writeText(pixCode); alert('Copiado!'); }} className="text-brand-pink"><Copy className="w-5 h-5" /></button>
             </div>
-            <button onClick={simulateApproval} disabled={loading} className="w-full bg-emerald-500 text-white font-bold py-4 rounded-2xl hover:bg-emerald-600 transition-all flex items-center justify-center gap-2">
-              {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <CheckCircle className="w-5 h-5" />} 🧪 Simular Aprovação
+
+            {/* AVISO DE ESPERA AUTOMÁTICA */}
+            <div className="flex items-center justify-center gap-2 text-emerald-400 bg-emerald-400/10 p-4 rounded-2xl animate-pulse mb-4">
+              <Loader2 className="w-5 h-5 animate-spin" />
+              <span className="font-semibold text-sm">Aguardando confirmação automática...</span>
+            </div>
+            
+            {/* BOTÃO PARA CHECAR MANUALMENTE */}
+            <button onClick={checkPaymentStatus} disabled={loading} className="w-full bg-white/10 hover:bg-white/20 text-white font-semibold py-3 rounded-xl transition-all flex items-center justify-center gap-2 text-sm">
+               {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <RefreshCw className="w-4 h-4" />} Já paguei! Verificar agora
             </button>
+
           </div>
         )}
       </motion.div>
