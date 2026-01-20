@@ -9,11 +9,13 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@google/generative-ai": "^0.24.1",
     "@supabase/supabase-js": "^2.90.1",
     "clsx": "^2.1.1",
     "css": "^3.0.0",
     "framer-motion": "^12.26.2",
     "lucide-react": "^0.562.0",
+    "react-router-dom": "^7.12.0",
     "tailwind": "^4.0.0",
     "tailwind-merge": "^3.4.0"
   },
@@ -25,10 +27,5 @@
     "react-dom": "^19.2.3",
     "tailwindcss": "^3.4.1",
     "vite": "^5.3.1"
-  },
-  "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview"
   }
 }

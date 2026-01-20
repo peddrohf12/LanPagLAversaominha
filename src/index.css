@@ -2,9 +2,33 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Se houver outros estilos globais, coloque abaixo */
-html, body {
+/* A Mágica do Background Global */
+body {
   margin: 0;
   padding: 0;
-  background-color: #05020a; /* Cor de fallback para o fundo */
+  font-family: 'Inter', sans-serif; /* Se tiver importado, senão use sans-serif */
+  background-color: #030014; /* Fundo base quase preto */
+  color: white;
+  min-height: 100vh;
+  
+  /* Esse gradiente cria a "luz" no topo e a escuridão embaixo */
+  background-image: 
+    radial-gradient(circle at 50% 0%, rgba(124, 58, 237, 0.15) 0%, transparent 50%),
+    radial-gradient(circle at 100% 0%, rgba(236, 72, 153, 0.1) 0%, transparent 40%);
+  background-attachment: fixed; /* O fundo fica parado enquanto o conteúdo rola */
+}
+
+/* Scrollbar estilizada para combinar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #030014;
+}
+::-webkit-scrollbar-thumb {
+  background: #333;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #555;
 }
