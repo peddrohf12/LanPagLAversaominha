@@ -2,33 +2,61 @@
 @tailwind components;
 @tailwind utilities;
 
-/* A Mágica do Background Global */
+/* 1. CONFIGURAÇÃO DE ALTURA */
+html, body {
+  height: 100%;
+  width: 100%;
+  overflow-x: hidden;
+}
+
+/* 2. NOVA ATMOSFERA "NEBULA FLOW" */
 body {
   margin: 0;
   padding: 0;
-  font-family: 'Inter', sans-serif; /* Se tiver importado, senão use sans-serif */
-  background-color: #030014; /* Fundo base quase preto */
-  color: white;
-  min-height: 100vh;
+  font-family: 'Inter', sans-serif;
   
-  /* Esse gradiente cria a "luz" no topo e a escuridão embaixo */
+  /* Cor de fundo de segurança (caso a imagem demore a carregar) */
+  background-color: #0D0221;
+  color: white;
+  min-height: 100%;
+  
+  /* A MÁGICA: Múltiplas camadas de gradiente para profundidade */
   background-image: 
-    radial-gradient(circle at 50% 0%, rgba(124, 58, 237, 0.15) 0%, transparent 50%),
-    radial-gradient(circle at 100% 0%, rgba(236, 72, 153, 0.1) 0%, transparent 40%);
-  background-attachment: fixed; /* O fundo fica parado enquanto o conteúdo rola */
+    /* Camada 1: Ponto de Luz Ciano (Tech/Brilho) - Topo Direito */
+    radial-gradient(at 90% 0%, rgba(34, 211, 238, 0.25) 0px, transparent 50%),
+    
+    /* Camada 2: Ponto de Luz Roxo Vibrante - Topo Esquerdo */
+    radial-gradient(at 0% 20%, rgba(167, 139, 250, 0.3) 0px, transparent 50%),
+    
+    /* Camada 3: A Grande Nuvem Rosa/Magenta - Embaixo Central */
+    radial-gradient(at 50% 90%, rgba(244, 114, 182, 0.25) 0px, transparent 60%),
+    
+    /* Camada 4: O Fluxo Base (Gradiente Linear Diagonal) */
+    /* Conecta tudo com um roxo profundo que vai escurecendo */
+    linear-gradient(135deg, #240a4a 0%, #0c031f 100%);
+    
+  /* Garante que o fundo fique parado e cubra tudo */
+  background-attachment: fixed;
+  background-size: 100% 100%; /* Força cobrir sem repetir */
+  background-repeat: no-repeat;
 }
 
-/* Scrollbar estilizada para combinar */
-::-webkit-scrollbar {
-  width: 8px;
+/* Scrollbar Cristalina */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { 
+  background: rgba(167, 139, 250, 0.5); 
+  border-radius: 10px; 
+  border: 1px solid rgba(255,255,255,0.1);
 }
-::-webkit-scrollbar-track {
-  background: #030014;
-}
-::-webkit-scrollbar-thumb {
-  background: #333;
-  border-radius: 4px;
-}
-::-webkit-scrollbar-thumb:hover {
-  background: #555;
+::-webkit-scrollbar-thumb:hover { background: rgba(167, 139, 250, 0.8); }
+
+/* Componentes Ethereal (Opcional, se você usar essa classe) */
+@layer components {
+  .ethereal-card {
+    @apply bg-white/5 backdrop-blur-xl border border-white/10 shadow-[0_8px_32px_0_rgba(31,38,135,0.15)] transition-all duration-300;
+  }
+  .ethereal-card:hover {
+    @apply bg-white/10 border-white/20 shadow-[0_8px_32px_0_rgba(139,92,246,0.25)];
+  }
 }

@@ -1,23 +1,38 @@
 import React from 'react';
 
-// Esse componente aceita qualquer coisa dentro (children) e aplica o efeito de vidro
 export const GlassCard = ({ children, className = "", hoverEffect = false }) => {
   return (
     <div className={`
       relative overflow-hidden
-      bg-[#1A1A23]/60            /* Fundo escuro semi-transparente */
-      backdrop-blur-xl           /* O desfoque poderoso (vidro fosco) */
-      border border-white/10     /* Borda sutil */
-      shadow-xl                  /* Sombra para profundidade */
-      rounded-3xl                /* Bordas bem redondas como na imagem */
-      transition-all duration-300
-      ${hoverEffect ? 'hover:bg-[#1A1A23]/80 hover:border-purple-500/30 hover:shadow-[0_0_20px_rgba(168,85,247,0.15)]' : ''}
+      
+      /* MUDANÇA AQUI: Fundo mais "rico" e menos "cinza morto" */
+      bg-gradient-to-br from-purple-900/30 via-[#1A1A23]/40 to-black/40
+      
+      /* Blur mais forte para o efeito etéreo */
+      backdrop-blur-2xl
+      
+      /* Borda mais brilhante e colorida (mistura roxo com ciano sutil) */
+      border border-white/10
+      border-t-white/20 border-l-white/15
+      
+      shadow-xl
+      rounded-3xl
+      transition-all duration-500
+      
+      /* Hover: Acende o card levemente */
+      ${hoverEffect ? 'hover:bg-purple-900/40 hover:border-purple-400/30 hover:shadow-[0_0_30px_rgba(168,85,247,0.2)]' : ''}
+      
       ${className}
     `}>
-      {/* Um brilho sutil no topo do cartão para dar volume 3D */}
-      <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-white/20 to-transparent"></div>
+      {/* Brilho Superior (Luz de cima) */}
+      <div className="absolute -top-20 -left-20 w-64 h-64 bg-purple-500/10 rounded-full blur-[80px] pointer-events-none"></div>
       
-      {/* O conteúdo real */}
+      {/* Brilho Inferior (Luz de baixo - oposto, ciano para contraste etéreo) */}
+      <div className="absolute -bottom-20 -right-20 w-64 h-64 bg-cyan-500/5 rounded-full blur-[80px] pointer-events-none"></div>
+      
+      {/* Linha de brilho na borda superior */}
+      <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-white/30 to-transparent opacity-50"></div>
+      
       <div className="relative z-10">
         {children}
       </div>

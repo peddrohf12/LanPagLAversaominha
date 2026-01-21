@@ -91,15 +91,15 @@ const PROFILES = {
   }
 }
 
-// --- PERGUNTAS SITUACIONAIS (SEM GENERICIDADE) ---
+// --- PERGUNTAS SITUACIONAIS ---
 const QUESTIONS = [
   {
     question: "1. Terça-feira à tarde. Um boleto inesperado e alto chega no seu e-mail. Qual é o primeiro movimento do seu corpo/mente?",
     options: [
-      { id: 'A', text: "Pânico imediato. Coração dispara, começo a fazer contas e checar saldo desesperadamente." }, // Fiscal
-      { id: 'D', text: "Raiva. 'Eu não acredito! Por que nada dá certo pra mim? Que universo injusto!'." }, // Montanha
-      { id: 'C', text: "Negação. Fecho o e-mail, finjo que não vi e vou ver uma série pra não pensar nisso." }, // Turista
-      { id: 'B', text: "Análise fria. 'Ok, de onde vou tirar esse dinheiro? Preciso criar um plano A, B e C agora'." } // Arquiteto
+      { id: 'A', text: "Pânico imediato. Coração dispara, começo a fazer contas e checar saldo desesperadamente." },
+      { id: 'D', text: "Raiva. 'Eu não acredito! Por que nada dá certo pra mim? Que universo injusto!'." },
+      { id: 'C', text: "Negação. Fecho o e-mail, finjo que não vi e vou ver uma série pra não pensar nisso." },
+      { id: 'B', text: "Análise fria. 'Ok, de onde vou tirar esse dinheiro? Preciso criar um plano A, B e C agora'." }
     ]
   },
   {
@@ -174,9 +174,8 @@ export default function Diagnostico() {
   // Estado do Quiz
   const [currentQuestion, setCurrentQuestion] = useState(0)
   const [scores, setScores] = useState({ A: 0, B: 0, C: 0, D: 0 })
-  const [selectedOption, setSelectedOption] = useState(null) // Para efeito visual do clique
+  const [selectedOption, setSelectedOption] = useState(null) 
   
-  // Efeito de "Flash" ao carregar resultado
   const [showResultAnim, setShowResultAnim] = useState(false)
 
   useEffect(() => {
@@ -201,31 +200,24 @@ export default function Diagnostico() {
   }
 
   const handleAnswer = (optionId) => {
-    // 1. Feedback Visual (Seleciona o botão)
     setSelectedOption(optionId)
-
-    // 2. Pequeno delay para o usuário ver o clique acontecendo
     setTimeout(() => {
       const newScores = { ...scores, [optionId]: scores[optionId] + 1 }
       setScores(newScores)
 
       if (currentQuestion < QUESTIONS.length - 1) {
         setCurrentQuestion(curr => curr + 1)
-        setSelectedOption(null) // Reseta seleção para a próxima
+        setSelectedOption(null) 
       } else {
         finishQuiz(newScores)
       }
-    }, 450) // Delay de 450ms (rápido, mas perceptível)
+    }, 450) 
   }
 
   const finishQuiz = async (finalScores) => {
     setLoading(true)
-    
-    // Lógica de Desempate (Prioridade: A > D > B > C)
     let winner = 'A';
     let maxScore = finalScores.A;
-
-    // Se houver empate, a ordem abaixo define quem ganha (baseado na gravidade do bloqueio)
     if (finalScores.D > maxScore) { winner = 'D'; maxScore = finalScores.D; }
     if (finalScores.B > maxScore) { winner = 'B'; maxScore = finalScores.B; }
     if (finalScores.C > maxScore) { winner = 'C'; maxScore = finalScores.C; }
@@ -259,11 +251,11 @@ export default function Diagnostico() {
   if (loading) return (
     <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
       <div className="w-8 h-8 border-4 border-purple-500 border-t-transparent rounded-full animate-spin"></div>
-      <span className="text-gray-400 text-sm animate-pulse">Calibrando frequências...</span>
+      <span className="text-gray-400 text-sm animate-pulse">Sintonizando frequências...</span>
     </div>
   )
 
-  // --- TELA DE RESULTADO (RELATÓRIO PREMIUM) ---
+  // --- TELA DE RESULTADO (GLASS STYLED) ---
   if (diagnosis) {
     const profile = PROFILES[diagnosis]
     const Icon = profile.icon
@@ -271,36 +263,37 @@ export default function Diagnostico() {
     return (
       <div className={`p-4 md:p-8 max-w-5xl mx-auto pb-24 transition-opacity duration-1000 ${showResultAnim ? 'opacity-100' : 'opacity-0'}`}>
         
-        {/* CABEÇALHO DO RESULTADO */}
-        <div className="bg-[#16161D] border border-white/5 rounded-3xl p-8 md:p-12 relative overflow-hidden mb-8 shadow-2xl">
+        {/* CABEÇALHO DO RESULTADO - VIDRO FOSCO */}
+        <div className="bg-[#16161D]/60 backdrop-blur-xl border border-white/10 rounded-3xl p-8 md:p-12 relative overflow-hidden mb-8 shadow-2xl">
           <div className={`absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-${profile.color.split('-')[1]}-500 to-transparent opacity-70`}></div>
+          <div className="absolute inset-0 bg-gradient-to-b from-white/5 to-transparent pointer-events-none"></div>
           
           <div className="relative z-10 text-center">
-            <div className={`inline-flex items-center gap-2 mb-6 ${profile.bg} px-4 py-1.5 rounded-full border ${profile.border}`}>
+            <div className={`inline-flex items-center gap-2 mb-6 ${profile.bg} px-4 py-1.5 rounded-full border ${profile.border} backdrop-blur-md`}>
               <Icon size={18} className={profile.color} />
               <span className={`text-xs font-bold tracking-widest uppercase ${profile.color}`}>Seu Arquétipo Vibracional</span>
             </div>
 
-            <h1 className={`text-3xl md:text-5xl font-bold mb-4 ${profile.color} drop-shadow-lg`}>
+            <h1 className={`text-3xl md:text-5xl font-bold mb-4 ${profile.color} drop-shadow-[0_0_15px_rgba(255,255,255,0.2)]`}>
               {profile.title}
             </h1>
-            <h2 className="text-xl text-gray-400 font-light italic mb-8">
+            <h2 className="text-xl text-gray-300 font-light italic mb-8 drop-shadow-sm">
               "{profile.subtitle}"
             </h2>
 
-            <p className="text-gray-300 text-lg leading-relaxed max-w-3xl mx-auto border-l-2 border-white/10 pl-6">
+            <p className="text-gray-200 text-lg leading-relaxed max-w-3xl mx-auto border-l-2 border-white/20 pl-6 bg-white/5 p-4 rounded-r-xl backdrop-blur-sm">
               {profile.description}
             </p>
           </div>
         </div>
 
-        {/* GRID DE DETALHES */}
+        {/* GRID DE DETALHES - GLASS CARDS */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
           
           {/* CARD: A ARMADILHA */}
-          <div className="bg-[#16161D] border border-red-500/20 rounded-3xl p-8 relative overflow-hidden hover:border-red-500/40 transition-colors">
+          <div className="bg-[#16161D]/40 backdrop-blur-md border border-red-500/20 rounded-3xl p-8 relative overflow-hidden hover:bg-[#16161D]/60 hover:border-red-500/40 transition-all duration-300 shadow-lg">
              <div className="absolute top-4 right-4 text-red-500 opacity-10"><ShieldAlert size={64}/></div>
-             <h3 className="text-red-400 font-bold text-lg mb-4 flex items-center gap-2">
+             <h3 className="text-red-400 font-bold text-lg mb-4 flex items-center gap-2 drop-shadow-sm">
                 <AlertTriangle size={20}/> O Grande Bloqueio
              </h3>
              <p className="text-gray-300 leading-relaxed font-medium">
@@ -309,14 +302,14 @@ export default function Diagnostico() {
           </div>
 
           {/* CARD: SINTOMAS */}
-          <div className="bg-[#16161D] border border-white/5 rounded-3xl p-8 hover:border-purple-500/30 transition-colors">
-             <h3 className="text-white font-bold text-lg mb-4 flex items-center gap-2">
+          <div className="bg-[#16161D]/40 backdrop-blur-md border border-white/10 rounded-3xl p-8 hover:bg-[#16161D]/60 hover:border-purple-500/30 transition-all duration-300 shadow-lg">
+             <h3 className="text-white font-bold text-lg mb-4 flex items-center gap-2 drop-shadow-sm">
                 <Activity size={20} className="text-purple-400"/> Sintomas Comuns
              </h3>
              <ul className="space-y-3">
                {profile.symptoms.map((sym, i) => (
-                 <li key={i} className="flex items-start gap-3 text-gray-400 text-sm">
-                   <div className="mt-1.5 min-w-[6px] h-[6px] rounded-full bg-purple-500 shadow-[0_0_5px_rgba(168,85,247,0.8)]"></div>
+                 <li key={i} className="flex items-start gap-3 text-gray-300 text-sm">
+                   <div className="mt-1.5 min-w-[6px] h-[6px] rounded-full bg-purple-500 shadow-[0_0_8px_rgba(168,85,247,0.8)]"></div>
                    {sym}
                  </li>
                ))}
@@ -325,20 +318,20 @@ export default function Diagnostico() {
         </div>
 
         {/* CARD: O PROTOCOLO DE CURA */}
-        <div className={`rounded-3xl p-8 md:p-10 border ${profile.border} ${profile.bg} relative overflow-hidden shadow-lg`}>
+        <div className={`rounded-3xl p-8 md:p-10 border ${profile.border} ${profile.bg} backdrop-blur-md relative overflow-hidden shadow-xl`}>
            <div className="relative z-10">
-              <h3 className={`font-bold text-2xl mb-8 flex items-center gap-3 ${profile.color}`}>
+              <h3 className={`font-bold text-2xl mb-8 flex items-center gap-3 ${profile.color} drop-shadow-md`}>
                 <Zap size={24} className="fill-current" />
                 Seu Protocolo de Ativação
               </h3>
               
               <div className="grid gap-4">
                 {profile.protocol.map((step, i) => (
-                  <div key={i} className="flex items-start gap-4 bg-[#16161D]/90 p-5 rounded-xl border border-white/5 hover:border-white/20 transition-all">
-                     <span className={`flex items-center justify-center w-8 h-8 rounded-full font-bold text-sm shrink-0 ${profile.bg} ${profile.color} border ${profile.border}`}>
-                       {i + 1}
-                     </span>
-                     <p className="text-gray-200 font-medium pt-1">{step}</p>
+                  <div key={i} className="flex items-start gap-4 bg-black/20 p-5 rounded-xl border border-white/5 hover:bg-black/30 hover:border-white/20 transition-all backdrop-blur-sm">
+                      <span className={`flex items-center justify-center w-8 h-8 rounded-full font-bold text-sm shrink-0 ${profile.bg} ${profile.color} border ${profile.border}`}>
+                        {i + 1}
+                      </span>
+                      <p className="text-gray-100 font-medium pt-1">{step}</p>
                   </div>
                 ))}
               </div>
@@ -349,7 +342,7 @@ export default function Diagnostico() {
         <div className="mt-12 text-center">
             <button 
               onClick={handleReset}
-              className="text-xs text-gray-500 hover:text-white flex items-center justify-center gap-2 mx-auto transition-colors group px-6 py-3 rounded-full hover:bg-white/5"
+              className="text-xs text-gray-400 hover:text-white flex items-center justify-center gap-2 mx-auto transition-all group px-6 py-3 rounded-full hover:bg-white/10 border border-transparent hover:border-white/10"
             >
               <RefreshCw size={14} className="group-hover:rotate-180 transition-transform duration-500" />
               Recalibrar e Refazer Diagnóstico
@@ -360,41 +353,44 @@ export default function Diagnostico() {
     )
   }
 
-  // --- TELA DO QUIZ ---
+  // --- TELA DO QUIZ (GLASS CARD) ---
   const question = QUESTIONS[currentQuestion]
 
   return (
     <div className="p-4 md:p-8 max-w-3xl mx-auto pb-24 min-h-[80vh] flex items-center justify-center">
       
-      {/* Container Principal com KEY para forçar re-render limpo a cada pergunta */}
-      <div key={currentQuestion} className="w-full bg-gradient-to-br from-[#23232E] to-[#1A1A23] border border-white/5 rounded-3xl p-6 md:p-10 shadow-2xl animate-fade-in-up">
+      {/* Container Principal Glassmorphism */}
+      <div key={currentQuestion} className="w-full bg-[#1A1A23]/60 backdrop-blur-2xl border border-white/10 rounded-3xl p-6 md:p-10 shadow-2xl animate-fade-in-up relative overflow-hidden">
         
+        {/* Glow de fundo sutil */}
+        <div className="absolute -top-20 -right-20 w-64 h-64 bg-purple-500/10 rounded-full blur-[80px] pointer-events-none"></div>
+
         {/* Cabeçalho do Quiz */}
-        <div className="flex justify-between items-end mb-6">
-           <div className="flex items-center gap-2 text-purple-400">
+        <div className="flex justify-between items-end mb-6 relative z-10">
+           <div className="flex items-center gap-2 text-purple-300">
              <Brain size={16} />
-             <span className="font-bold text-xs tracking-wider uppercase">
+             <span className="font-bold text-xs tracking-wider uppercase drop-shadow-sm">
                Análise Psico-Vibracional
              </span>
            </div>
-           <span className="text-gray-500 text-xs font-mono bg-black/20 px-2 py-1 rounded">
+           <span className="text-gray-400 text-xs font-mono bg-white/5 border border-white/5 px-2 py-1 rounded backdrop-blur-sm">
              {currentQuestion + 1} / {QUESTIONS.length}
            </span>
         </div>
 
         {/* Progress Bar */}
-        <div className="w-full h-1.5 bg-gray-800 rounded-full mb-8 overflow-hidden">
+        <div className="w-full h-1.5 bg-black/30 rounded-full mb-8 overflow-hidden backdrop-blur-sm">
           <div 
-            className="h-full bg-gradient-to-r from-purple-600 to-pink-500 transition-all duration-500 ease-out"
+            className="h-full bg-gradient-to-r from-purple-600 to-pink-500 transition-all duration-500 ease-out shadow-[0_0_10px_rgba(168,85,247,0.5)]"
             style={{ width: `${((currentQuestion + 1) / QUESTIONS.length) * 100}%` }}
           ></div>
         </div>
 
-        <h2 className="text-xl md:text-2xl font-bold text-white mb-8 leading-snug">
+        <h2 className="text-xl md:text-2xl font-bold text-white mb-8 leading-snug drop-shadow-md relative z-10">
           {question.question}
         </h2>
 
-        <div className="space-y-3">
+        <div className="space-y-3 relative z-10">
           {question.options.map((opt) => {
             const isSelected = selectedOption === opt.id
             
@@ -402,24 +398,24 @@ export default function Diagnostico() {
               <button
                 key={opt.id}
                 onClick={() => handleAnswer(opt.id)}
-                disabled={selectedOption !== null} // Bloqueia cliques múltiplos
-                className={`w-full text-left p-5 rounded-xl border transition-all duration-200 group relative overflow-hidden
+                disabled={selectedOption !== null}
+                className={`w-full text-left p-5 rounded-xl border transition-all duration-200 group relative overflow-hidden backdrop-blur-sm
                   ${isSelected 
-                    ? 'bg-purple-600 border-purple-500 shadow-[0_0_20px_rgba(168,85,247,0.4)]' 
-                    : 'bg-[#1A1A23] border-white/5 hover:border-purple-500/50 hover:bg-[#20202B]'
+                    ? 'bg-purple-600/80 border-purple-500 shadow-[0_0_25px_rgba(168,85,247,0.4)]' 
+                    : 'bg-white/5 border-white/5 hover:border-purple-500/30 hover:bg-white/10'
                   }
                 `}
               >
                 <div className="flex items-start gap-4 relative z-10">
                   <div className={`mt-0.5 w-5 h-5 rounded-full border flex items-center justify-center shrink-0 transition-colors
-                    ${isSelected ? 'border-white' : 'border-gray-600 group-hover:border-purple-500'}
+                    ${isSelected ? 'border-white bg-white/20' : 'border-gray-500 group-hover:border-purple-400'}
                   `}>
-                    <div className={`w-2.5 h-2.5 rounded-full bg-white transition-transform duration-200 
+                    <div className={`w-2.5 h-2.5 rounded-full bg-white transition-transform duration-200 shadow-sm
                       ${isSelected ? 'scale-100' : 'scale-0'}
                     `}></div>
                   </div>
                   <span className={`font-medium text-sm md:text-base transition-colors
-                    ${isSelected ? 'text-white' : 'text-gray-300 group-hover:text-white'}
+                    ${isSelected ? 'text-white font-bold' : 'text-gray-300 group-hover:text-white'}
                   `}>
                     {opt.text}
                   </span>
